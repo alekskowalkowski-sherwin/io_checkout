@@ -69,13 +69,12 @@ def vpr_lookup(row):
     tempcr_list.append(temp_output)
     prescr_list.append(pressure_output)
     
-    print(f'{valve} IO: FV-{flow_output}, TV-{temp_output}, PV-{pressure_output}'
+    print(f'{valve} IO: FV-{flow_output}, TV-{temp_output}, PV-{pressure_output}')
     
+          
     
-
 for rows, row in df_checkout.iterrows():
     addresses_v2w=v2w_lookup(row)
-          
 for rows, row in df_vpr.iterrows():
     addresses_vpr=vpr_lookup(row)
     
