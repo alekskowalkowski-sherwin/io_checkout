@@ -23,6 +23,9 @@ df_tags=pd.read_excel(path_tags)
 df_checkout=pd.read_excel(path_checkout, sheet_name="New Actuated Valve List")
 df_checkout=df_checkout.fillna("")
 
+df_vpr=pd.read_excel(path_checkout, shee_name="New Control Valve List")
+df_vpr=df_vpr.fillna("")
+
 #Define holder lists to append stuff to
 close_list=[]
 open_list=[]
@@ -72,6 +75,8 @@ def vpr_lookup(row):
 
 for rows, row in df_checkout.iterrows():
     addresses_v2w=v2w_lookup(row)
+          
+for rows, row in df_vpr.iterrows():
     addresses_vpr=vpr_lookup(row)
     
 
