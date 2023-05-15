@@ -72,7 +72,7 @@ def vpr_lookup(row):
     tempcr_list.append(temp_address)
     prescr_list.append(pressure_address)
     
-    print(f'{valve} IO: FV-{flow_output}, TV-{temp_output}, PV-{pressure_output}')
+    print(f'{valve} IO: FV-{flow_address}, TV-{temp_address}, PV-{pressure_address}')
     
           
     
