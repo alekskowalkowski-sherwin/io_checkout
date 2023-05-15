@@ -64,10 +64,13 @@ def vpr_lookup(row):
     temp_output=f'O_{valve}_TV'
     pressure_output=f'O_{valve}_PV'
     
+    flow_address= df_tags.loc[df_tags['NAME'] == flow_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == flow_output, 'SPECIFIER'].empty else None
+    temp_address= df_tags.loc[df_tags['NAME'] == temp_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == temp_output, 'SPECIFIER'].empty else None
+    pressure_address= df_tags.loc[df_tags['NAME'] == pressure_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == pressure_output, 'SPECIFIER'].empty else None
     
-    flowcr_list.append(flow_output)
-    tempcr_list.append(temp_output)
-    prescr_list.append(pressure_output)
+    flowcr_list.append(flow_address)
+    tempcr_list.append(temp_address)
+    prescr_list.append(pressure_address)
     
     print(f'{valve} IO: FV-{flow_output}, TV-{temp_output}, PV-{pressure_output}')
     
