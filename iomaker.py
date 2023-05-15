@@ -29,6 +29,10 @@ open_list=[]
 sol_list=[]
 valve_list=[]
 
+flowcr_list=[]
+tempcr_list=[]
+prescr_list=[]
+
 def v2w_lookup(row):
     valve = row['Valve Number']
     close_switch_id=f'I_{valve}_XSC'
@@ -51,16 +55,24 @@ def v2w_lookup(row):
     print(f'{valve} IO: XSC-{close_switch_address}, XSO-{open_switch_address}, XS-{solenoid_address}, {solenoid1_address}, {solenoid2_address})')
 
 
+def vpr_lookup(row):
+    valve = row['Valve Number']
+    flow_output=f'O_{valve}_FV'
+    temp_output=f'O_{valve}_TV'
+    pressure_output=f'O_{valve}_PV'
+    
+    
+    flowcr_list.append(flow_output)
+    tempcr_list.append(temp_output)
+    prescr_list.append(pressure_output)
+    
+    print(f'{valve} IO: FV-{flow_output}, TV-{temp_output}, PV-{pressure_output}'
+    
+    
+
 for rows, row in df_checkout.iterrows():
-    addresses=v2w_lookup(row)
-    #print(addresses)
-
-#print(valve_list)
-#print(close_list)
-#print(open_list)
-#print(sol_list)
+    addresses_v2w=v2w_lookup(row)
+    addresses_vpr=vpr_lookup(row)
+    
 
 
-
-#print(df_tags)
-#print(df_checkout)
