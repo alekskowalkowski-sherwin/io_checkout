@@ -23,7 +23,7 @@ df_tags=pd.read_excel(path_tags)
 df_checkout=pd.read_excel(path_checkout, sheet_name="New Actuated Valve List")
 df_checkout=df_checkout.fillna("")
 
-df_vpr=pd.read_excel(path_checkout, shee_name="New Control Valve List")
+df_vpr=pd.read_excel(path_checkout, sheet_name="New Control Valve List")
 df_vpr=df_vpr.fillna("")
 
 #Define holder lists to append stuff to
