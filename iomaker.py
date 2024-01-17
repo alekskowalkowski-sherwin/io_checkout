@@ -1,85 +1,63 @@
 import pandas as pd
 import numpy as np
-import tkinter as tk
-from tkinter import filedialog
-import re
-from pathlib import Path
-import os
-def xlookup(lookup_value, lookup_array, return_array, if_not_found: str = ''):
-    match_value = return_array.loc[lookup_array == lookup_value]
-    if match_value.empty:
-        return f'not found' if if_not_found == '' else if_not_found
+import openpyxl
 
+
+
+pd.set_option('display.max_columns', None)
+
+valve_descriptors = {
+    "replace_string": "VALVE",
+    "Closed Limit Switch": "I_VALVE_XSC",
+    "Opened Limit Switch": "I_VALVE_XSO",
+    "Solenoid": "O_VALVE_XS",
+    "Solenoid 1": "O_VALVE_XS1",
+    "Solenoid 2": "O_VALVE_XS2"
+}
+
+vpr_descriptors = {
+    "replace_string": "VALVE",
+    "Flow Output": "O_VALVE_FV",
+    "Temperature Output": "O_VALVE_TV",
+    "Pressure Output": "O_VALVE_PV"
+}
+
+def find_io_point(io_type, io_point_name):
+    temp_dict = {}
+    io_point = tags_df.loc[tags_df["NAME"] == io_point_name]["SPECIFIER"].values[0] if not tags_df.loc[tags_df["NAME"] == io_point_name].empty else None
+    if io_point is not None:
+        temp_dict[io_type] = io_point
     else:
-        return match_value.tolist()[0]
+        temp_dict[io_type] = "NA"
+    return temp_dict
+
+def generate_df(descriptors, device_list):
+    device_dict = {}
+    for device in device_list:
+        temp_dict = {}
+        for descriptor in descriptors.keys():
+            if descriptor == "replace_string":
+                continue
+            io_name = descriptors[descriptor].replace(descriptors["replace_string"], device)
+            temp_dict = {**temp_dict, **find_io_point(descriptor, io_name)}
+        device_dict[device] = temp_dict
+        device_df = pd.DataFrame.from_dict(device_dict, orient="index").reset_index().rename(columns={"index": "Device"})
+    return device_df
 
 
-#Get file path
-path_tags=os.getcwd()+'/tags.xlsx'
-path_checkout=os.getcwd()+'/1A - Valve Automated Checkout.xlsx'
+if __name__ == "__main__":
 
-#Set Dataframes in File Path, for the tag export and checkout sheet
-df_tags=pd.read_excel(path_tags)
-df_checkout=pd.read_excel(path_checkout, sheet_name="New Actuated Valve List")
-df_checkout=df_checkout.fillna("")
+    valve_dict = {}
+    vpr_dict = {}
 
-df_vpr=pd.read_excel(path_checkout, sheet_name="New Control Valve List")
-df_vpr=df_vpr.fillna("")
+    tags_df = pd.read_excel("./tags.xlsx")
+    reference_vpr_df = pd.read_excel("./1A - Valve Automated Checkout.xlsx", sheet_name="New Control Valve List")
+    reference_valve_df = pd.read_excel("./1A - Valve Automated Checkout.xlsx", sheet_name="New Actuated Valve List")
 
-#Define holder lists to append stuff to
-close_list=[]
-open_list=[]
-sol_list=[]
-valve_list=[]
+    vpr_list = reference_vpr_df["Valve Number"].tolist()
+    valve_list = reference_valve_df["Valve Number"].tolist()
 
-flowcr_list=[]
-tempcr_list=[]
-prescr_list=[]
-
-def v2w_lookup(row):
-    valve = row['Valve Number']
-    close_switch_id=f'I_{valve}_XSC'
-    open_switch_id=f'I_{valve}_XSO'
-    solenoid_id=f'O_{valve}_XS'
-    solenoid1_id=f'O_{valve}_XS1'
-    solenoid2_id=f'O_{valve}_XS2'
-
-    close_switch_address= df_tags.loc[df_tags['NAME'] == close_switch_id, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == close_switch_id, 'SPECIFIER'].empty else None
-    open_switch_address= df_tags.loc[df_tags['NAME'] == open_switch_id, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == open_switch_id, 'SPECIFIER'].empty else None
-    solenoid_address= df_tags.loc[df_tags['NAME'] == solenoid_id, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == solenoid_id, 'SPECIFIER'].empty else None
-    solenoid1_address= df_tags.loc[df_tags['NAME'] == solenoid1_id, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == solenoid1_id, 'SPECIFIER'].empty else None
-    solenoid2_address= df_tags.loc[df_tags['NAME'] == solenoid2_id, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == solenoid2_id, 'SPECIFIER'].empty else None
-
-    close_list.append(close_switch_address)
-    open_list.append(open_switch_address)
-    sol_list.append(solenoid_address)
-    valve_list.append(valve)
-
-    print(f'{valve} IO: XSC-{close_switch_address}, XSO-{open_switch_address}, XS-{solenoid_address}, {solenoid1_address}, {solenoid2_address})')
-
-
-def vpr_lookup(row):
-    valve = row['Valve Number']
-    flow_output=f'O_{valve}_FV'
-    temp_output=f'O_{valve}_TV'
-    pressure_output=f'O_{valve}_PV'
-    
-    flow_address= df_tags.loc[df_tags['NAME'] == flow_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == flow_output, 'SPECIFIER'].empty else None
-    temp_address= df_tags.loc[df_tags['NAME'] == temp_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == temp_output, 'SPECIFIER'].empty else None
-    pressure_address= df_tags.loc[df_tags['NAME'] == pressure_output, 'SPECIFIER'].iloc[0] if not df_tags.loc[df_tags['NAME'] == pressure_output, 'SPECIFIER'].empty else None
-    
-    flowcr_list.append(flow_address)
-    tempcr_list.append(temp_address)
-    prescr_list.append(pressure_address)
-    
-    print(f'{valve} IO: FV-{flow_address}, TV-{temp_address}, PV-{pressure_address}')
-    
-          
-    
-for rows, row in df_checkout.iterrows():
-    addresses_v2w=v2w_lookup(row)
-for rows, row in df_vpr.iterrows():
-    addresses_vpr=vpr_lookup(row)
-    
-
+    with pd.ExcelWriter('test.xlsx', engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
+        generate_df(valve_descriptors, valve_list).to_excel(writer, "Valves")
+        generate_df(vpr_descriptors, vpr_list).to_excel(writer, "VPR")
 
